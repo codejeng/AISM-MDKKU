@@ -46,6 +46,7 @@ interface SiteData {
   ai_score: number | null;
   manual_score: number | null;
   confidence: number | null;
+  is_mock: boolean;
 }
 
 const STEPS = ['Select Patient', 'Photograph Sites', 'Review & Save'];
@@ -83,6 +84,7 @@ function NewAssessmentContent() {
         ai_score: null,
         manual_score: null,
         confidence: null,
+        is_mock: false,
       };
     });
     setSiteData(initial);
@@ -145,6 +147,7 @@ function NewAssessmentContent() {
           ...prev[selectedSite.name],
           ai_score: result.score,
           confidence: result.confidence,
+          is_mock: result.mock || false,
         },
       }));
       setShowResults(true);
@@ -408,6 +411,7 @@ function NewAssessmentContent() {
                           manualScore={siteData[selectedSite.name].manual_score}
                           confidence={siteData[selectedSite.name].confidence}
                           onEditScore={handleOverrideScore}
+                          isMock={siteData[selectedSite.name].is_mock}
                         />
                       </Box>
                     )}
@@ -456,6 +460,22 @@ function NewAssessmentContent() {
               totalMrss={totalMrss}
             />
 
+            {/* Mock Data Warning */}
+            {Object.values(siteData).some((s) => s.is_mock && (s.ai_score !== null || s.manual_score !== null)) && (
+              <Alert
+                severity="warning"
+                sx={{ mt: 2, borderRadius: 2 }}
+                icon={<span style={{ fontSize: '1.2rem' }}>🧪</span>}
+              >
+                <Typography variant="body2" fontWeight={600}>
+                  Demo Mode — Simulated Scores
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  The AI model is not yet connected. Scores shown are simulated for demonstration purposes.
+                </Typography>
+              </Alert>
+            )}
+
             {/* Site Details */}
             <Typography variant="subtitle2" color="text.secondary" sx={{ mt: 3, mb: 1.5 }}>
               Site Details
@@ -479,6 +499,7 @@ function NewAssessmentContent() {
                       }));
                     }}
                     compact
+                    isMock={data?.is_mock}
                   />
                 );
               })}

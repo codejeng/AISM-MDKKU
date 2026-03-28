@@ -25,6 +25,7 @@ interface ScoreCardProps {
   confidence?: number | null;
   onEditScore?: (score: number) => void;
   compact?: boolean;
+  isMock?: boolean;
 }
 
 export default function ScoreCard({
@@ -36,6 +37,7 @@ export default function ScoreCard({
   confidence,
   onEditScore,
   compact = false,
+  isMock = false,
 }: ScoreCardProps) {
   const [showOverride, setShowOverride] = React.useState(false);
   const displayScore = manualScore !== null && manualScore !== undefined ? manualScore : aiScore;
@@ -102,6 +104,19 @@ export default function ScoreCard({
             size="small"
             variant="outlined"
             sx={{ color: 'text.secondary' }}
+          />
+        )}
+        {isMock && displayScore !== null && (
+          <Chip
+            label="🧪 Demo"
+            size="small"
+            sx={{
+              bgcolor: '#FFF3E0',
+              color: '#E65100',
+              fontWeight: 600,
+              fontSize: '0.65rem',
+              height: 20,
+            }}
           />
         )}
       </Box>
@@ -218,6 +233,20 @@ export default function ScoreCard({
                   <Typography variant="caption" color="warning.main" sx={{ mt: 0.5, display: 'block' }}>
                     ⚠️ Clinician override (AI predicted: {aiScore})
                   </Typography>
+                )}
+
+                {isMock && (
+                  <Chip
+                    label="🧪 Demo Mode — Simulated Score"
+                    size="small"
+                    sx={{
+                      mt: 1,
+                      bgcolor: '#FFF3E0',
+                      color: '#E65100',
+                      fontWeight: 600,
+                      fontSize: '0.7rem',
+                    }}
+                  />
                 )}
               </Box>
             )}

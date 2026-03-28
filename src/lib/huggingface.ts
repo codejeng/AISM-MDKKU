@@ -2,6 +2,7 @@ export interface PredictionResult {
   score: number;          // 0-3 mRSS grade
   confidence: number;     // 0.0 - 1.0
   probabilities: number[]; // [p0, p1, p2, p3]
+  mock?: boolean;         // true when using simulated prediction
 }
 
 export async function predictSkinScore(imageBase64: string): Promise<PredictionResult> {

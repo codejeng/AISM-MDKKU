@@ -11,22 +11,48 @@ export async function POST(request: NextRequest) {
     const HF_TOKEN = process.env.HUGGINGFACE_API_TOKEN;
     const MODEL_ID = process.env.HUGGINGFACE_MODEL_ID;
 
-    if (!HF_TOKEN || !MODEL_ID) {
-      // Return mock data when credentials are not configured
+    const isConfigured = HF_TOKEN && MODEL_ID
+      && !HF_TOKEN.startsWith('your-') && !MODEL_ID.startsWith('your-');
+
+    if (!isConfigured) {
+      // Return realistic mock data when credentials are not configured
       console.warn('Hugging Face credentials not configured, returning mock prediction');
-      const mockScore = Math.floor(Math.random() * 4); // 0-3
-      const mockProbabilities = [0, 0, 0, 0];
-      mockProbabilities[mockScore] = 0.75 + Math.random() * 0.2;
-      const remaining = 1 - mockProbabilities[mockScore];
-      for (let i = 0; i < 4; i++) {
-        if (i !== mockScore) {
-          mockProbabilities[i] = remaining / 3;
+
+      // Simulate AI inference delay (1.5–3 seconds)
+      const delay = 1500 + Math.random() * 1500;
+      await new Promise((resolve) => setTimeout(resolve, delay));
+
+      // Weighted random: most skin sites tend to be normal (0) or mild (1)
+      const weights = [0.45, 0.30, 0.15, 0.10]; // probabilities for scores 0, 1, 2, 3
+      const rand = Math.random();
+      let cumulative = 0;
+      let mockScore = 0;
+      for (let i = 0; i < weights.length; i++) {
+        cumulative += weights[i];
+        if (rand < cumulative) {
+          mockScore = i;
+          break;
         }
       }
+
+      // Generate realistic probability distribution
+      const mockConfidence = 0.65 + Math.random() * 0.30; // 0.65–0.95
+      const mockProbabilities = [0, 0, 0, 0];
+      mockProbabilities[mockScore] = mockConfidence;
+      const remaining = 1 - mockConfidence;
+      // Distribute remaining probability with some randomness
+      const otherIndices = [0, 1, 2, 3].filter((i) => i !== mockScore);
+      const rawShares = otherIndices.map(() => Math.random());
+      const shareSum = rawShares.reduce((a, b) => a + b, 0);
+      otherIndices.forEach((idx, i) => {
+        mockProbabilities[idx] = (rawShares[i] / shareSum) * remaining;
+      });
+
       return NextResponse.json({
         score: mockScore,
-        confidence: mockProbabilities[mockScore],
+        confidence: mockConfidence,
         probabilities: mockProbabilities,
+        mock: true,
       });
     }
 

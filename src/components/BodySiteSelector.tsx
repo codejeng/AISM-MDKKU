@@ -37,6 +37,16 @@ export default function BodySiteSelector({
   onSelectSite,
   selectedSite,
 }: BodySiteSelectorProps) {
+  const [expandedRegions, setExpandedRegions] = React.useState<Record<string, boolean>>({});
+
+  const handleAccordionChange = (regionKey: string) => (_: React.SyntheticEvent, isExpanded: boolean) => {
+    setExpandedRegions((prev) => ({ ...prev, [regionKey]: isExpanded }));
+  };
+
+  const isExpanded = (regionKey: string, completed: number, total: number) => {
+    if (regionKey in expandedRegions) return expandedRegions[regionKey];
+    return completed < total; // default: expand if incomplete
+  };
   const getCompletedCount = (regionKey: string) => {
     return BODY_SITES.filter(
       (s) => s.region === regionKey && siteScores[s.name]?.ai_score !== null && siteScores[s.name]?.ai_score !== undefined
@@ -95,7 +105,8 @@ export default function BodySiteSelector({
         return (
           <Accordion
             key={region.key}
-            defaultExpanded={completed < total}
+            expanded={isExpanded(region.key, completed, total)}
+            onChange={handleAccordionChange(region.key)}
             sx={{
               mb: 1,
               '&:before': { display: 'none' },
